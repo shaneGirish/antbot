@@ -29,9 +29,9 @@ sudo update-alternatives --config java
 Download and extract [Android Studio](http://developer.android.com/sdk/installing/studio.html#download)
 #### Add to Path
 ```
-echo export PATH=\${PATH}:/<path>/android-studio/sdk/tools:/<path>/android-studio/sdk/platform-tools:/<path>/android-studio/bin >> ~/.bashrc
+echo export PATH=\${PATH}:/<path>/android-studio/sdk/tools:/<path>/android-studio/sdk/platform-tools:/<path>/android-studio/bin >> ~/.profile
 
-echo export ANDROID_HOME=/<path>/android-studio/sdk >> ~/.bashrc
+echo export ANDROID_HOME=/<path>/android-studio/sdk >> ~/.profile
 ```
 
 #### Install Android APIs
@@ -52,13 +52,23 @@ Make sure to update Android Studio immediately on first start.
 These commands are designed for Ubuntu Precise. Change the first line as needed.
 ```
 sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu precise main" > /etc/apt/sources.list.d/ros-latest.list'
-wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+% wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+wget https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -O - | sudo apt-key add -
 sudo apt-get update
 ```
 
 #### Setup ROS
 ```
 mkdir -p ~/android
+
+sudo apt-get install ros-hydro-desktop-full
+sudo apt-get install ros-hydro-rosjava-build-tools ros-hydro-rosjava-bootstrap
+sudo apt-get install python-rosinstall
+
+sudo rosdep init
+rosdep update
+
+echo "source /opt/ros/hydro/setup.bash" >> ~/.profile
 
 wstool init -j4 ~/android/src https://raw.github.com/rosjava/rosjava/hydro/android_core.rosinstall
 % Use this command instead, incase you need the sample apps.
@@ -67,6 +77,13 @@ wstool init -j4 ~/android/src https://raw.github.com/rosjava/rosjava/hydro/andro
 source /opt/ros/hydro/setup.bash
 cd ~/android
 catkin_make
+```
+
+#### Setup ROS_Serial
+```
+sudo apt-get install ros-hydro-rosserial ros-hydro-rosserial-arduino
+cd <sketchbook>/libraries
+rosrun rosserial_arduino make_libraries.py .
 ```
 
 #### Start Android Studio

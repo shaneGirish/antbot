@@ -41,7 +41,7 @@ public class MainActivity extends RosActivity {
 
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
 
-    private SerialInputOutputManager mSerialIoManager;
+    private SerialInputOutputManager mSerialIoManager = null;
 
     private final SerialInputOutputManager.Listener mListener =
             new SerialInputOutputManager.Listener() {
@@ -86,14 +86,23 @@ public class MainActivity extends RosActivity {
     protected void onResume() {
         super.onResume();
 
-        mSerialIoManager.stop();
-        mSerialIoManager = new SerialInputOutputManager(driver.getPorts().get(0), mListener);
-        mExecutor.submit(mSerialIoManager);
+        if(mSerialIoManager != null) {
+            mSerialIoManager.stop();
+        }
 
         UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
         List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
+
         if (!availableDrivers.isEmpty()) {
             driver = availableDrivers.get(0);
+
+            Log.e(TAG, "onResume, driver=" + driver
+                    + ";ports=" + driver.getPorts().size()
+                    + ";port=" + driver.getPorts().get(0)
+            );
+
+            mSerialIoManager = new SerialInputOutputManager(driver.getPorts().get(0), mListener);
+            mExecutor.submit(mSerialIoManager);
 
             UsbDeviceConnection connection = manager.openDevice(driver.getDevice());
             if (connection == null) {
@@ -181,7 +190,7 @@ public class MainActivity extends RosActivity {
 
         Log.d(TAG, "init, setMasterUri=" + getMasterUri());
 
-        mSerialIoManager = new SerialInputOutputManager(driver.getPorts().get(0), mListener);
-        mExecutor.submit(mSerialIoManager);
+        // mSerialIoManager = new SerialInputOutputManager(driver.getPorts().get(0), mListener);
+        // mExecutor.submit(mSerialIoManager);
     }
 }

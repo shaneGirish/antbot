@@ -29,6 +29,9 @@ import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import fi.iki.elonen.ServerRunner;
+import fi.iki.elonen.debug.DebugServer;
+
 public class MainActivity extends RosActivity {
 
     private final String TAG = MainActivity.class.getSimpleName();
@@ -73,6 +76,8 @@ public class MainActivity extends RosActivity {
         mTitleTextView = (TextView) findViewById(R.id.demoTitle);
         mDumpTextView = (TextView) findViewById(R.id.consoleText);
         mScrollView = (ScrollView) findViewById(R.id.demoScroller);
+
+        ServerRunner.run(DebugServer.class);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 

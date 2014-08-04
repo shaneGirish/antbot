@@ -16,10 +16,10 @@ public class ServerRunner {
             server.start();
         } catch (IOException ioe) {
             System.err.println("Couldn't start server:\n" + ioe);
-            //System.exit(-1);
+            System.exit(-1);
         }
 
-        /*System.out.println("Server started, Hit Enter to stop.\n");
+        System.out.println("Server started, Hit Enter to stop.\n");
 
         try {
             System.in.read();
@@ -27,6 +27,6 @@ public class ServerRunner {
         }
 
         server.stop();
-        System.out.println("Server stopped.\n");*/
+        System.out.println("Server stopped.\n");
     }
 }

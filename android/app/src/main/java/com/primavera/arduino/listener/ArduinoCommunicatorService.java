@@ -49,10 +49,10 @@ public class ArduinoCommunicatorService extends Service {
     private volatile UsbEndpoint mInUsbEndpoint = null;
     private volatile UsbEndpoint mOutUsbEndpoint = null;
 
-    public final static String DATA_RECEIVED_INTENT = "primavera.arduino.intent.action.DATA_RECEIVED";
-    public final static String SEND_DATA_INTENT = "primavera.arduino.intent.action.SEND_DATA";
-    public final static String DATA_SENT_INTERNAL_INTENT = "primavera.arduino.internal.intent.action.DATA_SENT";
-    public final static String DATA_EXTRA = "primavera.arduino.intent.extra.DATA";
+    final static String DATA_RECEIVED_INTENT = "primavera.arduino.intent.action.DATA_RECEIVED";
+    final static String SEND_DATA_INTENT = "primavera.arduino.intent.action.SEND_DATA";
+    final static String DATA_SENT_INTERNAL_INTENT = "primavera.arduino.internal.intent.action.DATA_SENT";
+    final static String DATA_EXTRA = "primavera.arduino.intent.extra.DATA";
 
     @Override
     public IBinder onBind(Intent arg0) {
@@ -88,7 +88,7 @@ public class ArduinoCommunicatorService extends Service {
         }
 
         if (DEBUG) Log.d(TAG, "Permission granted");
-        mUsbDevice = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+        mUsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
         if (!initDevice()) {
             if (DEBUG) Log.e(TAG, "Init of device failed!");
             stopSelf();
@@ -114,23 +114,6 @@ public class ArduinoCommunicatorService extends Service {
         }
     }
 
-    private byte[] getLineEncoding(int baudRate) {
-        final byte[] lineEncodingRequest = { (byte) 0x80, 0x25, 0x00, 0x00, 0x00, 0x00, 0x08 };
-        switch (baudRate) {
-        case 14400:
-            lineEncodingRequest[0] = 0x40;
-            lineEncodingRequest[1] = 0x38;
-            break;
-
-        case 19200:
-            lineEncodingRequest[0] = 0x00;
-            lineEncodingRequest[1] = 0x4B;
-            break;
-        }
-
-        return lineEncodingRequest;
-    }
-
     private boolean initDevice() {
         UsbManager usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
         mUsbConnection = usbManager.openDevice(mUsbDevice);
@@ -142,16 +125,37 @@ public class ArduinoCommunicatorService extends Service {
         UsbInterface usbInterface = mUsbDevice.getInterface(1);
         if (!mUsbConnection.claimInterface(usbInterface, true)) {
             if (DEBUG) Log.e(TAG, "Claiming interface failed!");
-            Toast.makeText(getBaseContext(), getString(R.string.claimning_interface_failed), Toast.LENGTH_LONG).show();
+            Toast.makeText(getBaseContext(), getString(R.string.claiming_interface_failed), Toast.LENGTH_LONG).show();
             mUsbConnection.close();
             return false;
         }
 
         // Arduino USB serial converter setup
         // Set control line state
-        mUsbConnection.controlTransfer(0x21, 0x22, 0, 0, null, 0, 0);
+        //mUsbConnection.controlTransfer(0x21, 0x22, 0, 0, null, 0, 0);
         // Set line encoding.
-        mUsbConnection.controlTransfer(0x21, 0x20, 0, 0, getLineEncoding(9600), 7, 0);
+        //mUsbConnection.controlTransfer(0x21, 0x20, 0, 0, getLineEncoding(9600), 7, 0);
+
+        int baudRate = 115200;
+        byte[] msg = {
+                (byte) ( baudRate & 0xff),
+                (byte) ((baudRate >> 8 ) & 0xff),
+                (byte) ((baudRate >> 16) & 0xff),
+                (byte) ((baudRate >> 24) & 0xff),
+                0,
+                0,
+                (byte) 8
+        };
+
+        mUsbConnection.controlTransfer(
+                UsbConstants.USB_TYPE_CLASS | 0x01,
+                0x20,
+                0,
+                0,
+                msg,
+                msg != null ? msg.length : 0,
+                5000
+        );
 
         for (int i = 0; i < usbInterface.getEndpointCount(); i++) {
             if (usbInterface.getEndpoint(i).getType() == UsbConstants.USB_ENDPOINT_XFER_BULK) {

@@ -13,7 +13,7 @@ android {
     defaultConfig {
         applicationId "ed.insectlab.antbot"
         minSdkVersion 12
-        targetSdkVersion 12
+        targetSdkVersion 19
         versionCode 1
         versionName "1.0"
     }

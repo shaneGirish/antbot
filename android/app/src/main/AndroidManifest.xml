@@ -50,6 +50,9 @@
                 <action android:name="org.ros.android.NodeMainExecutorService" />
             </intent-filter>
         </service>
+        <service
+            android:name="com.primavera.arduino.listener.ArduinoCommunicatorService"
+            android:enabled="true" />
     </application>
 
 </manifest>

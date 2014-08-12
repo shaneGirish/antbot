@@ -7,9 +7,9 @@ void setup() {
   WHEEL_ENCODERS::setup();
   
   messenger.attach(OnUnknownCommand);
-  messenger.attach(MESSAGES::MOTOR, OnMotorCommand);
+  messenger.attach(MESSAGES::SET_SPEEDS, OnSetSpeedsCommand);
   messenger.attach(MESSAGES::STOP, OnStopCommand);
-  messenger.attach(MESSAGES::ANDROID_TEST, OnTestCommand);
+  messenger.attach(MESSAGES::TRANSITION_TO_SPEEDS, OnTransitionToSpeedsCommand);
   
   // Send the status to the PC that says the Arduino has booted
   // messenger.sendCmd(MESSAGES::ACKNOWLEDGE, "Arduino has started!");
@@ -19,17 +19,12 @@ void OnUnknownCommand() {
   messenger.sendCmd(MESSAGES::ERROR, "Command not recognized");
 }
 
-void OnTestCommand() {
-  messenger.sendCmd(MESSAGES::ACKNOWLEDGE, "Android Test Ack");
+void OnTransitionToSpeedsCommand() {
+  MOTORS::transitionToSpeeds(messenger.readInt16Arg(), messenger.readInt16Arg());
 }
 
-void OnMotorCommand() {
+void OnSetSpeedsCommand() {
   MOTORS::setSpeeds(messenger.readInt16Arg(), messenger.readInt16Arg());
-  // messenger.sendCmdStart(MESSAGES::ACKNOWLEDGE);
-  // messenger.sendCmdArg("Motor Speeds : ");
-  // messenger.sendCmdArg(l);
-  // messenger.sendCmdArg(r);
-  // messenger.sendCmdEnd();
 }
 
 void OnStopCommand() {

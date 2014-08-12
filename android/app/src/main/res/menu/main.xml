@@ -2,8 +2,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".Main" >
-    <item android:id="@+id/action_settings"
-        android:title="@string/action_settings"
+    <item android:id="@+id/action_reset_pose"
+        android:title="@string/action_reset_pose"
+        android:orderInCategory="100"/>
+    <item android:id="@+id/action_reset_log"
+        android:title="@string/action_reset_log"
+        android:orderInCategory="100"/>
+    <item android:id="@+id/action_simple_route"
+        android:title="@string/action_simple_route"
+        android:orderInCategory="100"/>
+    <item android:id="@+id/action_rotate_route"
+        android:title="@string/action_rotate_route"
         android:orderInCategory="100"/>
 
         <!--app:showAsAction="never"-->

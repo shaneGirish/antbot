@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Antbot</string>
+    <string name="default_title">Initializing…\n</string>
     <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
-
+    <string name="action_reset_pose">Reset Pose</string>
+    <string name="action_reset_log">Reset Log</string>
+    <string name="action_simple_route">Simple Route</string>
+    <string name="action_rotate_route">Rotate Route</string>
 
     <string name="permission_denied">Permission denied!</string>
     <string name="receiving">Receiving!</string>

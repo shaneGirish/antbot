@@ -1,13 +1,19 @@
 package ed.insectlab.antbot;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.text.Editable;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,9 +25,9 @@ import org.ros.android.RosActivity;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 
+import ed.insectlab.antbot.controlpanel.ControlPanelNode;
 import ed.insectlab.antbot.navigator.NavigatorNode;
-import ed.insectlab.antbot.routes.RotateRouteNode;
-import ed.insectlab.antbot.routes.StraightRouteNode;
+import ed.insectlab.antbot.routes.*;
 import ed.insectlab.antbot.serial.SerialNode;
 
 public class MainActivity extends RosActivity {
@@ -33,9 +39,13 @@ public class MainActivity extends RosActivity {
     private TextView log;
     private ScrollView scrollView;
 
-    public SerialNode serialNode;
+    protected NodeConfiguration defaultNodeConfiguration;
+    protected NodeMainExecutor nodeExecutor;
 
-    public final boolean DEBUG = true;
+    public SerialNode serialNode;
+    public NavigatorNode navigatorNode;
+
+    public final boolean DEBUG = false;
 
     public MainActivity() {
         super("Antbot", "Antbot");
@@ -60,6 +70,16 @@ public class MainActivity extends RosActivity {
         });
     }
 
+    public void clearLog() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                log.setText("");
+                scrollView.smoothScrollTo(0, log.getBottom());
+            }
+        });
+    }
+
     public void createToast(final String text, final int length) {
         runOnUiThread(new Runnable() {
             @Override
@@ -77,8 +97,6 @@ public class MainActivity extends RosActivity {
         MainActivity.instance = this;
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-        // new DebugServer().start();
 
         title = (TextView) findViewById(R.id.demoTitle);
         log = (TextView) findViewById(R.id.consoleText);
@@ -122,25 +140,94 @@ public class MainActivity extends RosActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
 
-        return item.getItemId() == R.id.action_settings || super.onOptionsItemSelected(item);
+        final EditText input;
+
+        switch(item.getItemId()) {
+            case R.id.action_reset_pose:
+                navigatorNode.resetPose();
+                break;
+            case R.id.action_reset_log:
+                clearLog();
+                break;
+            case R.id.action_rotate_route:
+                input = new EditText(this);
+                input.setInputType(InputType.TYPE_CLASS_NUMBER);
+                getUserInput("Rotate Route", "Please provide speed for rotation : ", input)
+                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            try {
+                                Editable value = input.getText();
+                                nodeExecutor.execute(
+                                        new RotateRouteNode(
+                                                Integer.parseInt(value.toString())
+                                        ),
+                                        defaultNodeConfiguration
+                                );
+                            } catch (Exception e) {
+                                createToast("Must input number.", Toast.LENGTH_LONG);
+                            }
+                        }
+                    })
+                    .show();
+
+                break;
+            case R.id.action_simple_route:
+                input = new EditText(this);
+                input.setInputType(InputType.TYPE_CLASS_NUMBER);
+                getUserInput("Rotate Route", "Please provide speed for rotation : ", input)
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                try {
+                                    Editable value = input.getText();
+                                    nodeExecutor.execute(
+                                            new StraightRouteNode(
+                                                    Integer.parseInt(value.toString())
+                                            ),
+                                            defaultNodeConfiguration
+                                    );
+                                } catch(Exception e) {
+                                    createToast("Must input number.", Toast.LENGTH_LONG);
+                                }
+                            }
+                        })
+                        .show();
+                //nodeExecutor.execute(new StraightRouteNode(), defaultNodeConfiguration);
+                break;
+        }
+
+
+        return false;
+        //return item.getItemId() == R.id.action_settings || super.onOptionsItemSelected(item);
+    }
+
+    protected AlertDialog.Builder getUserInput(String title, String message, EditText input) {
+        return new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setMessage(message)
+                .setView(input)
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {}
+                });
     }
 
     @Override
     protected void init(NodeMainExecutor nodeMainExecutor) {
-        NodeConfiguration nodeConfiguration =
-                NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
-        nodeConfiguration.setMasterUri(getMasterUri());
+        this.nodeExecutor = nodeMainExecutor;
+        defaultNodeConfiguration = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
+        defaultNodeConfiguration.setMasterUri(getMasterUri());
 
         serialNode = new SerialNode();
+        navigatorNode = new NavigatorNode();
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(ArduinoCommunicatorService.DATA_RECEIVED_INTENT);
         filter.addAction(ArduinoCommunicatorService.DATA_SENT_INTERNAL_INTENT);
         registerReceiver(serialNode.mReceiver, filter);
 
-        nodeMainExecutor.execute(serialNode, nodeConfiguration);
-        nodeMainExecutor.execute(new NavigatorNode(), nodeConfiguration);
-        nodeMainExecutor.execute(new RotateRouteNode(), nodeConfiguration);
+        nodeExecutor.execute(serialNode, defaultNodeConfiguration);
+        nodeExecutor.execute(navigatorNode, defaultNodeConfiguration);
+        nodeExecutor.execute(new ControlPanelNode(), defaultNodeConfiguration);
+        //nodeMainExecutor.execute(new StraightRouteNode(), nodeConfiguration);
 
         Log.d(TAG, "init, setMasterUri=" + getMasterUri());
     }

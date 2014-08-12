@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Antbot Control Panel</title>
+  </head>
+  <body>
+    <h1>Antbot Control Panel</h1>
+
+    <script>
+      var port = "$port";
+      var ip = "$ip";
+      var socket = createWebSocket();
+
+      function createWebSocket() {
+        socket = new WebSocket("ws://" + ip + ":" + port + "/");
+        socket.onmessage = listener;
+
+        return socket;
+      }
+
+      function refreshWebSocket() {
+        if(socket.readyState == WebSocket.CLOSED || socket.readyState == WebSocket.CLOSING) {
+          socket = createWebSocket();
+        }
+        return socket;
+      }
+
+      function sendMessage(message) {
+        refreshWebSocket();
+
+        if(socket.readyState == WebSocket.CONNECTING) {
+          socket.onopen = function() {
+            socket.send(message);
+          };
+        } else {
+          socket.send(message);
+        }
+      }
+
+      function listener(message) {
+        console.log("Reply : ", message);
+      }
+
+      function $(message, retries) {
+        if(!retries) {
+          retries = 0;
+        } else if(retries > 3) {
+          console.error("'" + message + "' could not be sent. " + (retries-1) + " made.");
+        }
+
+        try {
+          sendMessage(message);
+        } catch(e) {
+          $(message, retries?++retries:1);
+        }
+      }
+    </script>
+  </body>
+</html>

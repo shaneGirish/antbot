@@ -4,7 +4,6 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.util.Log;
@@ -99,7 +98,7 @@ public class SerialNode extends AbstractNodeMain {
                         break;*/
                     case ARDUINO_UNO_R3_USB_PRODUCT_ID:
                         scope.createToast("Arduino Uno R3 " + scope.getString(R.string.found), Toast.LENGTH_SHORT);
-                        scope.setTitleText("Arduino Uno R3");
+                        scope.setTitleText("ArduinoUnoR3 found.\nWaiting for input.");
                         usbDevice = tempUsbDevice;
                         break;
                 }
@@ -137,10 +136,21 @@ public class SerialNode extends AbstractNodeMain {
         });*/
     }
 
+    public void sendMessage(SerialMessage message) {
+        if(message.command != null) {
+            sendMessage(message.toString());
+        } else {
+            Log.i(TAG, "Not a valid message: " + message.source);
+        }
+    }
+
     public void sendMessage(String message) {
+        Log.i(TAG, "message: " + message);
         Intent intent = new Intent(ArduinoCommunicatorService.SEND_DATA_INTENT);
         intent.putExtra(ArduinoCommunicatorService.DATA_EXTRA, message.getBytes());
         scope.sendBroadcast(intent);
+
+        scope.appendLog("> " + message);
     }
 
     @Override

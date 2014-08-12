@@ -4,9 +4,6 @@ import org.ros.concurrent.CancellableLoop;
 
 import java.util.ArrayList;
 
-import ed.insectlab.antbot.MainActivity;
-import ed.insectlab.antbot.serial.SerialNode;
-
 /**
  * Created by antbot on 04/08/14.
  */
@@ -17,11 +14,11 @@ public class RouteLoop extends CancellableLoop {
     @Override
     protected void loop() throws InterruptedException {
         if(routePosition >= route.size()) {
-            MainActivity.instance.serialNode.sendMessage(RouteInstruction.create(0, 0, 0).getCommandMessage());
+            RouteInstruction.STOP_COMMAND.execute();
             this.cancel();
         } else {
             RouteInstruction instruction = route.get(routePosition);
-            MainActivity.instance.serialNode.sendMessage(instruction.getCommandMessage());
+            instruction.execute();
             ++routePosition;
             Thread.sleep(instruction.duration);
         }

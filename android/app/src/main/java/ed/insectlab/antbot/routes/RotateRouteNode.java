@@ -8,6 +8,13 @@ import org.ros.node.ConnectedNode;
  * Created by antbot on 04/08/14.
  */
 public class RotateRouteNode extends AbstractNodeMain {
+
+    private final int speed;
+
+    public RotateRouteNode(int speed) {
+        this.speed = speed;
+    }
+
     @Override
     public GraphName getDefaultNodeName() {
         return GraphName.of("antbot/StraightRouteNode");
@@ -18,8 +25,8 @@ public class RotateRouteNode extends AbstractNodeMain {
         connectedNode.executeCancellableLoop(new RouteLoop() {
             @Override
             protected void setup() {
-                route.add(RouteInstruction.create(0, 0, 5000));
-                route.add(RouteInstruction.create(-200, 200, 10000));
+                route.add(new RouteInstruction(0, 0, 1000));
+                route.add(new RouteInstruction(-speed, speed, 5000));
             }
         });
     }

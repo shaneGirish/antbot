@@ -7,7 +7,7 @@ import fi.iki.elonen.WebSocket;
 * @author Paul S. Hawke (paul.hawke@gmail.com)
 *         On: 4/23/14 at 10:31 PM
 */
-class DebugWebSocketServer extends NanoWebSocketServer {
+public class DebugWebSocketServer extends NanoWebSocketServer {
     private final boolean debug;
 
     public DebugWebSocketServer(int port, boolean debug) {

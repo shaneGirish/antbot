@@ -49,10 +49,10 @@ public class ArduinoCommunicatorService extends Service {
     private volatile UsbEndpoint mInUsbEndpoint = null;
     private volatile UsbEndpoint mOutUsbEndpoint = null;
 
-    final static String DATA_RECEIVED_INTENT = "primavera.arduino.intent.action.DATA_RECEIVED";
-    final static String SEND_DATA_INTENT = "primavera.arduino.intent.action.SEND_DATA";
-    final static String DATA_SENT_INTERNAL_INTENT = "primavera.arduino.internal.intent.action.DATA_SENT";
-    final static String DATA_EXTRA = "primavera.arduino.intent.extra.DATA";
+    final public static String DATA_RECEIVED_INTENT = "primavera.arduino.intent.action.DATA_RECEIVED";
+    final public static String SEND_DATA_INTENT = "primavera.arduino.intent.action.SEND_DATA";
+    final public static String DATA_SENT_INTERNAL_INTENT = "primavera.arduino.internal.intent.action.DATA_SENT";
+    final public static String DATA_EXTRA = "primavera.arduino.intent.extra.DATA";
 
     @Override
     public IBinder onBind(Intent arg0) {
@@ -255,6 +255,7 @@ public class ArduinoCommunicatorService extends Service {
 
                         if (DEBUG) Log.d(TAG, "calling bulkTransfer() out");
                         final int len = mUsbConnection.bulkTransfer(mOutUsbEndpoint, dataToSend, dataToSend.length, 0);
+                        if (DEBUG) Log.d(TAG, "'" + new String(dataToSend) + "'");
                         if (DEBUG) Log.d(TAG, len + " of " + dataToSend.length + " sent.");
                         Intent sendIntent = new Intent(DATA_SENT_INTERNAL_INTENT);
                         sendIntent.putExtra(DATA_EXTRA, dataToSend);

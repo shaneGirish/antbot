@@ -24,10 +24,12 @@
         android:id="@+id/demoTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:text="@string/app_name"
+        android:text="@string/default_title"
         android:textSize="24sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="60dp" />
 
     <View
         android:id="@+id/separator"

@@ -8,8 +8,6 @@ namespace MESSAGES {
     ERROR,
     MOTOR,
     STOP,
-    LEFT_WHEEL,
-    RIGHT_WHEEL,
     ANDROID_TEST
   };
   

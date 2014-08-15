@@ -4,7 +4,6 @@ void setup() {
   LED::setup();
   MOTORS::setup();
   MESSAGES::setup();
-  WHEEL_ENCODERS::setup();
   
   messenger.attach(OnUnknownCommand);
   messenger.attach(MESSAGES::MOTOR, OnMotorCommand);
